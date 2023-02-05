@@ -100,9 +100,6 @@ function ready() {
 			for (x = 1; x <= PAGE_WIDTH; x++) {
 				var onPageIndex = getPageIndex(px,py,x,y);
 				var paletteIndex = paletteImage[onPageIndex] + 1
-				if (paletteIndex > 63) {
-					console.log("TOO LARGE")
-				}
 				pixels.push(paletteIndex)
 			}
 		}
@@ -118,6 +115,15 @@ function ready() {
 		return pal
 	}
 
+	const MAX_LABEL_SIZE = 48
+
+	function lengthLimit(name, info) {
+		if (name.length + info.length > MAX_LABEL_SIZE) {
+			return name.substring(0,MAX_LABEL_SIZE-info.length) + info
+		}
+		return name + info
+	}
+
 	saveButton.onclick = function(event) {
 		var fn = canvas.title.replace(/\.[^/.]+$/, "")
 		var pages = []
@@ -126,7 +132,7 @@ function ready() {
 			for (var x = 1; x <= pageW; x++) {
 				console.log(x,y)
 				pages.push({
-					label: fn + ' : page ('+ x + ','+ y + ') of (' + pageW + 'x' + pageH + ').',
+					label: lengthLimit(fn, ' : page ('+ x + ','+ y + ') of (' + pageW + 'x' + pageH + ').'),
 					palette: getPalette(),
 					pixels: getPixels(x,y),
 					width: PAGE_WIDTH,
