@@ -126,8 +126,7 @@ function ready() {
 			for (var x = 1; x <= pageW; x++) {
 				console.log(x,y)
 				pages.push({
-					label: fn,
-					tooltip: 'Page ('+ x + ','+ y + ') of (' + pageW + 'x' + pageH + ').',
+					label: fn + ' : page ('+ x + ','+ y + ') of (' + pageW + 'x' + pageH + ').',
 					palette: getPalette(),
 					pixels: getPixels(x,y),
 					width: PAGE_WIDTH,
