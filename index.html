@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="index.js"></script>
+    <script src="rgbquant.js"></script>
+    <link rel="stylesheet" href="index.css">
+  </head>
+  <body>
+    <div>
+      <label for="imageInput">Input image:</label>
+      <input type="file" id="imageInput" name="imageInput" accept="image/*"/>
+    </div>
+    <div>
+      <label for="ditherType">Dither Type</label>
+      <select id="ditherType">
+        <option value="">None</option>
+        <option value="FloydSteinberg">Floyd Steinberg</option>
+        <option value="FalseFloydSteinberg">False Floyd Steinberg</option>
+        <option value="Stucki">Stucki</option>
+        <option value="Atkinson">Atkinson</option>
+        <option value="Jarvis">Jarvis</option>
+        <option value="Burkes">Burkes</option>
+        <option value="Sierra">Sierra</option>
+        <option value="TwoSierra">Two Sierra</option>
+        <option value="SierraLite">Sierra Lite</option>
+      </select>
+      <input type="checkbox" id="serpentineDither">
+      <label for="serpentineDither">Serpentine Dither</label>
+    </div>
+    <div>
+      <input type="radio" id="onepage" name="pageInput" value="onepage">
+      <label for="onepage">Scale to one page (128x128).</label><br>
+      <input type="radio" id="manypages" name="pageInput" value="manypages">
+      <label for="manypages">Scale to closest page size.</label><br>
+      <input type="radio" id="specpages" name="pageInput" value="specpages">
+      <label for="specpages">Scale to pages:</label>
+      <input type="number" min="1" max="50" name="pagesx" id="pagesx" value="1">
+      <input type="number" min="1" max="50" name="pagesy" id="pagesy" value="1">
+    </div>
+    <div>
+      <button id="process">Process</button>
+      <button id="save">Save</button>
+    </div>
+    <div>
+      <img id="image" hidden>
+      <canvas id="canvas" width="128" height="128" hidden></canvas>
+      <img id="processedImage">
+      <canvas id="exportCanvas" width="128" height="128"></canvas>
+      <script>ready();</script>
+      <a id="downloadAnchorElem" style="display:none"></a>
+    </div> 
+  </body>
+</html>
