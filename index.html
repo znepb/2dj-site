@@ -32,7 +32,7 @@
       <input type="radio" id="onepage" name="pageInput" value="onepage">
       <label for="onepage">Scale to one page (128x128).</label><br>
       <input type="radio" id="manypages" name="pageInput" value="manypages">
-      <label for="manypages">Scale to closest page size.</label><br>
+      <label for="manypages">Scale to closest page size. </label><label id="scaledLabel"></label><br>
       <input type="radio" id="specpages" name="pageInput" value="specpages">
       <label for="specpages">Scale to pages:</label>
       <input type="number" min="1" max="50" name="pagesx" id="pagesx" value="1">
@@ -54,7 +54,7 @@
       <p>
         When this exports a single file it'll be in the .2dj file format. <br>
         Whenever this exports multiple pages it'll export it as a .2dja file. This is a JSON file of a specific format, which is as follows.<br>
-        {pages: JSON array of 2dj JSON objects, width: integer number of pages wide the image is, title: string filename}<br>
+        {pages: JSON array of 2dj JSON objects, width: integer pages wide, height: integer pages tall, title: string filename}<br>
       </p>
     </div>
   </body>

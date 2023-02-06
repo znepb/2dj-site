@@ -68,6 +68,7 @@ function ready() {
 		} else if (manyPages.checked) {
 			pageW = Math.max(Math.floor(image.width / PAGE_WIDTH), 1);
 			pageH = Math.max(Math.floor(image.height / PAGE_HEIGHT),1);
+			document.getElementById("scaledLabel").innerHTML = "Scaled to " + pageW + " by " + pageH + " pages."
 		}
 		var closestWidth = PAGE_WIDTH * pageW;
 		var closestHeight = PAGE_HEIGHT * pageH;
@@ -146,6 +147,7 @@ function ready() {
 			downloadJSON({
 				pages: pages,
 				width: pageW,
+				height: pageH,
 				title: fn,
 			}, fn+".2dja")
 		}
