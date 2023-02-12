@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <script src="index.js"></script>
-    <script src="rgbquant.js"></script>
     <title>2DJ Converter</title>
     <link rel="stylesheet" href="index.css">
   </head>
@@ -36,7 +34,9 @@
       <input type="radio" id="specpages" name="pageInput" value="specpages">
       <label for="specpages">Scale to pages:</label>
       <input type="number" min="1" max="50" name="pagesx" id="pagesx" value="1">
-      <input type="number" min="1" max="50" name="pagesy" id="pagesy" value="1">
+      <input type="number" min="1" max="50" name="pagesy" id="pagesy" value="1"><br>
+      <input type="checkbox" id="zippedFile" name="zippedInput" value="true">
+      <label for="zippedFile">Export as zipped file</label>
     </div>
     <div>
       <button id="process">Process</button>
@@ -50,15 +50,17 @@
       <canvas id="canvas" width="128" height="128" hidden></canvas>
       <img id="processedImage">
       <canvas id="exportCanvas" width="128" height="128"></canvas>
-      <script>ready();</script>
       <a id="downloadAnchorElem" style="display:none"></a>
     </div>
     <div>
       <p>
         When this exports a single file it'll be in the .2dj file format. <br>
-        Whenever this exports multiple pages it'll export it as a .2dja file. This is a JSON file of a specific format, which is as follows.<br>
+        Whenever this exports multiple pages without the zipped file checkbox checked it'll export it as a .2dja file. This is a JSON file of a specific format, which is as follows.<br>
         {pages: JSON array of 2dj JSON objects, width: integer pages wide, height: integer pages tall, title: string filename}<br>
       </p>
     </div>
+    <script src="rgbquant.js"></script>
+    <script src="jszip.min.js"></script>
+    <script src="index.js"></script>
   </body>
 </html>
