@@ -23,6 +23,7 @@ const specPages = document.getElementById("specpages");
 const zippedFile = document.getElementById("zippedFile");
 const pagesX = document.getElementById("pagesx");
 const pagesY = document.getElementById("pagesy");
+const transparency = document.getElementById("transparency");
 
 function downloadJSON(obj, name) {
 	var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(obj));
@@ -78,17 +79,35 @@ processButton.onclick = function (event) {
 	canvas.width = size[0]
 	canvas.height = size[1]
 	// clear the canvas
-	canvasCtx.fillRect(0, 0, canvas.width, canvas.height);
+	canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
 	// draw the image
 	canvasCtx.drawImage(image, 0, 0, canvas.width, canvas.height);
 	// generate the palette
 	quantizer.sample(canvas);
 	// quantize the image
 	var quantizedImage = quantizer.reduce(canvas, null, ditherType.value, serpentineDither.checked);
+	// Get palette image
 	paletteImage = quantizer.reduce(canvas, 2, ditherType.value, serpentineDither.checked);
 	palette = quantizer.palette(true, true)
 	// draw it on the canvas
 	canvasCtx.putImageData(new ImageData(new Uint8ClampedArray(quantizedImage), canvas.width, canvas.height), 0, 0);
+
+	if (transparency.checked) {
+		// Transfer transparency
+		var imageData = canvasCtx.getImageData(0,0,canvas.width,canvas.height);
+		for (var y = 0; y < imageData.height; y++) {
+			var rowStart = y*imageData.width
+			for (var x = 0; x < imageData.width; x++) {
+				var index = (x+rowStart)*4 + 3;
+				if (imageData[index] < 125) { // check for transparent pixels from the source image
+					paletteImage[x+rowStart] = -1
+				} 
+				if (paletteImage[x+rowStart] == null) {
+					paletteImage[x+rowStart] = -1
+				}
+			}
+		}
+	}
 
 	processedImageOutput.src = canvas.toDataURL("image/png"); // show the preview
 };
@@ -130,10 +149,8 @@ function lengthLimit(name, info) {
 saveButton.onclick = function (event) {
 	var fn = canvas.title.replace(/\.[^/.]+$/, "")
 	var pages = []
-	console.log(pageW, pageH)
 	for (var y = 1; y <= pageH; y++) {
 		for (var x = 1; x <= pageW; x++) {
-			console.log(x, y)
 			pages.push({
 				label: lengthLimit(fn, ' : page (' + x + ',' + y + ') of (' + pageW + 'x' + pageH + ')'),
 				palette: getPalette(),
