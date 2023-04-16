@@ -25,6 +25,8 @@
       </select>
       <input type="checkbox" id="serpentineDither">
       <label for="serpentineDither">Serpentine Dither</label>
+      <input type="checkbox" id="perPageDither">
+      <label for="perPageDither">Per Page Quantization</label>
     </div>
     <div>
       <input type="radio" id="onepage" name="pageInput" value="onepage">
@@ -64,6 +66,7 @@
         Source code can be found <a href="https://github.com/MasonGulu/2dj-site">here</a>
       </p>
     </div>
+    <canvas id="pageCanvas" width="128" height="128"></canvas>
     <script src="rgbquant.js"></script>
     <script src="jszip.min.js"></script>
     <script src="index.js"></script>
