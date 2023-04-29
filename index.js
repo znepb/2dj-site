@@ -27,6 +27,10 @@ const pagesY = document.getElementById("pagesy")
 const transparency = document.getElementById("transparency")
 const pageCanvas = document.getElementById("pageCanvas")
 const pageCtx = pageCanvas.getContext("2d")
+const automaticLabel = document.getElementById("automaticLabel")
+const manualLabel = document.getElementById("manualLabel")
+const appendPageInfo = document.getElementById("appendPageInfo")
+const manualLabelInput = document.getElementById("manualLabelInput")
 
 function downloadJSON(obj, name) {
 	var dataStr = "data:text/jsoncharset=utf-8," + encodeURIComponent(JSON.stringify(obj))
@@ -191,10 +195,18 @@ function lengthLimit(name, info) {
 saveButton.onclick = function (event) {
 	var fn = canvas.title.replace(/\.[^/.]+$/, "")
 	var pages = []
+	var label = fn
+	if (manualLabel.checked) {
+		label = manualLabelInput.value
+	}
 	for (var y = 1; y <= pageH; y++) {
 		for (var x = 1; x <= pageW; x++) {
+			var pageInfo = ""
+			if (appendPageInfo.checked) {
+				pageInfo = ' : page (' + x + ',' + y + ') of (' + pageW + 'x' + pageH + ')'
+			}
 			pages.push({
-				label: lengthLimit(fn, ' : page (' + x + ',' + y + ') of (' + pageW + 'x' + pageH + ')'),
+				label: lengthLimit(label, pageInfo),
 				palette: getPalette(x,y),
 				pixels: getPixels(x, y),
 				width: PAGE_WIDTH,
