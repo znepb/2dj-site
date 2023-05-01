@@ -18,7 +18,6 @@ const serpentineDither = document.getElementById("serpentineDither")
 const perPageDither = document.getElementById("perPageDither")
 const ditherType = document.getElementById("ditherType")
 const image = document.getElementById("image")
-const onlyOnePage = document.getElementById("onepage")
 const manyPages = document.getElementById("manypages")
 const specPages = document.getElementById("specpages")
 const outputFormat = document.getElementById("outputFormat")
@@ -31,6 +30,8 @@ const automaticLabel = document.getElementById("automaticLabel")
 const manualLabel = document.getElementById("manualLabel")
 const appendPageInfo = document.getElementById("appendPageInfo")
 const manualLabelInput = document.getElementById("manualLabelInput")
+const imageInput = document.getElementById("imageInput")
+const autoProcess = document.getElementById("autoProcess")
 
 function downloadJSON(obj, name) {
 	var dataStr = "data:text/jsoncharset=utf-8," + encodeURIComponent(JSON.stringify(obj))
@@ -53,36 +54,7 @@ var paletteImage = []
 
 const processedImageOutput = document.getElementById("processedImage")
 
-document.getElementById('imageInput').onchange = function (event) {
-	var selectedFile = event.target.files[0]
-	var reader = new FileReader()
-
-	canvas.title = selectedFile.name
-
-	reader.onload = function (event) {
-		image.src = event.target.result
-	}
-
-	reader.readAsDataURL(selectedFile)
-}
-
-function getPaletteIndex(x,y) {
-	return x + (y * size[1])
-}
-
-function mergeIntoPaletteImage(px,py,image) {
-	var pageX = px * PAGE_WIDTH
-	var pageY = py * PAGE_HEIGHT
-	for (y = 0; y < PAGE_HEIGHT; y++) {
-		for (x = 0; x < PAGE_WIDTH; x++) {
-			var toIndex = getPaletteIndex(pageX+x, pageY + y)
-			var fromIndex = x+(y*PAGE_WIDTH)
-			paletteImage[toIndex] = image[fromIndex]
-		}
-	}
-}
-
-processButton.onclick = function (event) {
+const process = () => {
 	canvasCtx.fillStyle = "black"
 	quantizer = new RgbQuant({ colors: 63 })
 	pageW = 1
@@ -154,6 +126,64 @@ processButton.onclick = function (event) {
 	processedImageOutput.src = canvas.toDataURL("image/png") // show the preview
 }
 
+const monitorChanges = [
+  serpentineDither,
+  perPageDither,
+  ditherType,
+  manyPages,
+  specPages,
+  pagesX,
+  pagesY,
+  transparency,
+];
+
+monitorChanges.forEach((element) => {
+	element.addEventListener("input", () => {
+		if (autoProcess.checked) {
+      process();
+    }	
+	})
+})
+
+imageInput.onchange = function (event) {
+  var selectedFile = event.target.files[0];
+
+  var reader = new FileReader();
+
+  canvas.title = selectedFile.name;
+
+  reader.onload = function (event) {
+    image.src = event.target.result;
+  };
+
+  reader.readAsDataURL(selectedFile);
+
+	// for some reason, image inputting won't cause a change unless there's a timeout here
+	setTimeout(() => {
+		if (autoProcess.checked) {
+      process();
+    }
+	}, 100)
+};
+
+function getPaletteIndex(x,y) {
+	return x + (y * size[1])
+}
+
+function mergeIntoPaletteImage(px,py,image) {
+	var pageX = px * PAGE_WIDTH
+	var pageY = py * PAGE_HEIGHT
+	for (y = 0; y < PAGE_HEIGHT; y++) {
+		for (x = 0; x < PAGE_WIDTH; x++) {
+			var toIndex = getPaletteIndex(pageX+x, pageY + y)
+			var fromIndex = x+(y*PAGE_WIDTH)
+			paletteImage[toIndex] = image[fromIndex]
+		}
+	}
+}
+
+processButton.onclick = process;
+
 function getPageIndex(px, py, x, y) {
 	return PAGE_WIDTH * pageW * (y + ((py - 1) * PAGE_HEIGHT) - 1) + (px - 1) * PAGE_WIDTH + x - 1
 }
@@ -215,16 +245,19 @@ saveButton.onclick = function (event) {
 		}
 	}
 	if (outputFormat.value == "2dj") {
-		if (onlyOnePage.checked) {
-			downloadJSON(pages[0], fn + ".2dj")
-		} else {
-			downloadJSON({
-				pages: pages,
-				width: pageW,
-				height: pageH,
-				title: fn,
-			}, fn + ".2dja")
-		}
+		if (pages.length === 1) {
+      downloadJSON(pages[0], fn + ".2dj");
+    } else {
+      downloadJSON(
+        {
+          pages: pages,
+          width: pageW,
+          height: pageH,
+          title: fn,
+        },
+        fn + ".2dja"
+      );
+    }
 	} else if (outputFormat.value == "zip") {
 		var zip = new JSZip()
 		for (var i = 0; i < pages.length; i++) {

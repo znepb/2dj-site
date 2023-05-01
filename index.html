@@ -3,84 +3,166 @@
   <head>
     <title>2DJ Converter</title>
     <link rel="stylesheet" href="index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   </head>
   <body>
-    <div>
-      <label for="imageInput">Input image:</label>
-      <input type="file" id="imageInput" name="imageInput" accept="image/*"/>
-    </div>
-    <div>
-      <label for="ditherType">Dither Type</label>
-      <select id="ditherType">
-        <option value="">None</option>
-        <option value="FloydSteinberg">Floyd Steinberg</option>
-        <option value="FalseFloydSteinberg">False Floyd Steinberg</option>
-        <option value="Stucki">Stucki</option>
-        <option value="Atkinson">Atkinson</option>
-        <option value="Jarvis">Jarvis</option>
-        <option value="Burkes">Burkes</option>
-        <option value="Sierra">Sierra</option>
-        <option value="TwoSierra">Two Sierra</option>
-        <option value="SierraLite">Sierra Lite</option>
-      </select>
-      <input type="checkbox" id="serpentineDither">
-      <label for="serpentineDither">Serpentine Dither</label>
-      <input type="checkbox" id="perPageDither">
-      <label for="perPageDither">Per Page Quantization</label>
-    </div>
-    <div>
-      <input type="radio" id="onepage" name="pageInput" value="onepage">
-      <label for="onepage">Scale to one page (128x128).</label><br>
-      <input type="radio" id="manypages" name="pageInput" value="manypages">
-      <label for="manypages">Scale to closest page size. </label><br>
-      <input type="radio" id="specpages" name="pageInput" value="specpages">
-      <label for="specpages">Scale to pages:</label>
-      <input type="number" min="1" max="50" name="pagesx" id="pagesx" value="1">
-      <input type="number" min="1" max="50" name="pagesy" id="pagesy" value="1"><br>
-      <label>Format</label>
-      <select id="outputFormat">
-        <option value="2dj">2dj/2dja</option>
-        <option value="zip">Zip of 2dj</option>
-      </select>
-    </div>
-    <div>
-      <input type="checkbox" id="transparency">
-      <label for="transparency">Transparency</label>
-    </div>
-    <div>
-      <label>Page labels:</label>
-      <input type="radio" id="automaticLabel" name="labelInput">
-      <label for="automaticLabel">Filename</label>
-      <input type="radio" id="manualLabel" name="labelInput">
-      <input type="text" for="manualLabel" id="manualLabelInput">
-      <input type="checkbox" id="appendPageInfo" value="true">
-      <label for="appendPageInfo">Append page info</label>
-    </div>
-    <div>
-      <button id="process">Process</button>
-      <button id="save">Save</button>
-    </div>
-    <div>
-      <label id="scaledLabel"></label>
-    </div>
-    <div>
-      <img id="image" hidden>
-      <canvas id="canvas" width="128" height="128" hidden></canvas>
-      <img id="processedImage">
-      <canvas id="exportCanvas" width="128" height="128"></canvas>
-      <a id="downloadAnchorElem" style="display:none"></a>
-    </div>
-    <div>
+    <main class="main">
+      <header>
+        <h1>Image -> 2DJ Converter</h1>
+        <p>
+          This tool converts any image (png, webp, jpg, etc,) into a format that can be printed to a poster using the 
+          <a href="https://github.com/switchcraft-cc/sc-peripherals">sc-peripherals</a> mod on the SwitchCraft server.
+        </p>
+      </header>
+      <section class="section">
+        <div class="input">
+          <label for="imageInput">
+            <h3>Input Image</h3>
+            <p class="informationText">Width & height should be a multiple of 128</p>
+          </label>
+          <input type="file" id="imageInput" name="imageInput" accept="image/*"/>
+        </div>
+      </section>
+      <section class="section">
+        <h2>Scaling</h2>
+        <div class="radio">
+          <div>
+            <input checked type="radio" id="manypages" name="pageInput" value="manypages">
+            <label for="manypages">Scale to closest page size</label><br>
+          </div>
+          <div>
+            <input type="radio" id="specpages" name="pageInput" value="specpages">
+            <label for="specpages">Scale to pages:</label>
+            <input type="number" min="1" max="50" name="pagesx" id="pagesx" value="1"> by 
+            <input type="number" min="1" max="50" name="pagesy" id="pagesy" value="1"><br>
+          </div>
+        </div>
+      </section>
+      <section class="section">
+        <h2>Colors</h2>
+        <div class="input">
+          <label for="ditherType">
+            <h3>Dither method</h3>
+            <p class="informationText">Makes the image appear to have more colors, at a marginal loss of quality</p>
+          </label>
+          <select id="ditherType">
+            <option value="">None</option>
+            <option value="FloydSteinberg">Floyd Steinberg</option>
+            <option value="FalseFloydSteinberg">False Floyd Steinberg</option>
+            <option value="Stucki">Stucki</option>
+            <option value="Atkinson">Atkinson</option>
+            <option value="Jarvis">Jarvis</option>
+            <option value="Burkes">Burkes</option>
+            <option value="Sierra">Sierra</option>
+            <option value="TwoSierra">Two Sierra</option>
+            <option value="SierraLite">Sierra Lite</option>
+          </select>
+        </div>
+
+        <div class="input">
+          <label for="serpentineDither">
+            <h3>Serpentine Dither</h3>
+            <p class="informationText">When enabled, dithering will be applied in a "snake pattern" (left -> right, down, right -> left, repeat)</p>
+          </label>
+          <input type="checkbox" id="serpentineDither">
+        </div>
+
+        <div class="input">
+          <label for="perPageDither">
+            <h3>Per Page Quantization</h3>
+            <p class="informationText">
+              Calculates poster palettes per-page rather than a global palette,
+              resulting in a clearer output for larger images
+            </p>
+          </label>
+          <input type="checkbox" id="perPageDither">
+        </div>
+
+        <div class="input">
+          <label for="transparency">
+            <h3>Transparency</h3>
+            <p class="informationText">Enable transparent pixels in the output</p>
+          </label>
+          <input type="checkbox" id="transparency">
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Format and labeling</h2>
+
+        <div class="input">
+          <label for="outputFormat">
+            <h3>Export Format</h3>
+          </label>
+          <select id="outputFormat">
+            <option value="2dj">2dj/2dja</option>
+            <option value="zip">Zip of 2dj</option>
+          </select>
+        </div>
+
+        <div class="radio">
+          <div>
+            <input type="radio" id="automaticLabel" name="labelInput" checked>
+            <label for="automaticLabel">Filename</label>
+          </div>
+          <div>
+            <input type="radio" id="manualLabel" name="labelInput">
+            <input type="text" for="manualLabel" id="manualLabelInput">
+          </div>
+          <div>
+            <input type="checkbox" id="appendPageInfo" checked>
+            <label for="appendPageInfo">Append page info</label>
+          </div>
+        </div>
+      </section>
+      <details>
+        <summary>Export Formats</summary>
+        <div style="height: 0.25rem;"></div>
+        <h3>2dj/2dja</h3>
+        Single pages (e.g. a 1x1 page) will be exported as 2dj files, while multiple pages will be 
+        exported as 2dja files. The specification for 2dja is as follows:<br />
+        <ul>
+          <li>Pages: A JSON array of 2dj JSON objects</li>
+          <li>width: integer, pages wide</li>
+          <li>height: integer, pages tall</li>
+          <li>title: string, filename</li>
+        </ul>
+        <div style="height: 0.25rem;"></div>
+        <h3>zip</h3>
+        Exports a zip file containing the output image separated into 2dj files.
+      </details>
       <p>
-        When this exports a single file it'll be in the .2dj file format.<br>
-        Whenever this exports multiple pages without the zipped file checkbox checked it'll export it as a .2dja file. This is a JSON file of a specific format, which is as follows.<br>
-        {pages: JSON array of 2dj JSON objects, width: integer pages wide, height: integer pages tall, title: string filename}<br>
         Source code can be found <a href="https://github.com/MasonGulu/2dj-site">here</a>
       </p>
+    </main>
+
+    <div class="outputArea">
+      <label for="autoProcess">
+        <input checked id="autoProcess" type="checkbox" />
+        <span>Live preview</span>
+      </label>
+      <div>
+        <button id="process">Process</button>
+        <button id="save">Save</button>
+      </div>
+      <div>
+        <label id="scaledLabel"></label>
+      </div>
+      <div>
+        <img id="image" hidden>
+        <canvas id="canvas" width="128" height="128" hidden></canvas>
+        <img id="processedImage">
+        <canvas id="exportCanvas" width="128" height="128"></canvas>
+        <a id="downloadAnchorElem" style="display:none"></a>
+      </div>
     </div>
+
     <canvas id="pageCanvas" width="128" height="128" hidden></canvas>
     <script src="rgbquant.js"></script>
     <script src="jszip.min.js"></script>
     <script src="index.js"></script>
+    
   </body>
 </html>
