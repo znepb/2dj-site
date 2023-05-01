@@ -37,8 +37,11 @@
       <label for="specpages">Scale to pages:</label>
       <input type="number" min="1" max="50" name="pagesx" id="pagesx" value="1">
       <input type="number" min="1" max="50" name="pagesy" id="pagesy" value="1"><br>
-      <input type="checkbox" id="zippedFile" name="zippedInput" value="true">
-      <label for="zippedFile">Export as zipped file</label>
+      <label>Format</label>
+      <select id="outputFormat">
+        <option value="2dj">2dj/2dja</option>
+        <option value="zip">zip</option>
+      </select>
     </div>
     <div>
       <input type="checkbox" id="transparency">

@@ -21,7 +21,7 @@ const image = document.getElementById("image")
 const onlyOnePage = document.getElementById("onepage")
 const manyPages = document.getElementById("manypages")
 const specPages = document.getElementById("specpages")
-const zippedFile = document.getElementById("zippedFile")
+const outputFormat = document.getElementById("outputFormat")
 const pagesX = document.getElementById("pagesx")
 const pagesY = document.getElementById("pagesy")
 const transparency = document.getElementById("transparency")
@@ -214,21 +214,9 @@ saveButton.onclick = function (event) {
 			})
 		}
 	}
-	if (onlyOnePage.checked) {
-		downloadJSON(pages[0], fn + ".2dj")
-	} else {
-		if (zippedFile.checked) {
-			var zip = new JSZip()
-			for (var i = 0; i < pages.length; i++) {
-				zip.file(pages[i].label + ".2dj", JSON.stringify(pages[i]))
-			}
-			zip.generateAsync({ type: "base64" }).then(function (base64) {
-				var dataStr = "data:application/zip;base64," + base64
-				var dlAnchorElem = document.getElementById('downloadAnchorElem')
-				dlAnchorElem.setAttribute("href", dataStr)
-				dlAnchorElem.setAttribute("download", fn + ".2dj.zip")
-				dlAnchorElem.click()
-			});
+	if (outputFormat.value == "2dj") {
+		if (onlyOnePage.checked) {
+			downloadJSON(pages[0], fn + ".2dj")
 		} else {
 			downloadJSON({
 				pages: pages,
@@ -237,5 +225,17 @@ saveButton.onclick = function (event) {
 				title: fn,
 			}, fn + ".2dja")
 		}
+	} else if (outputFormat.value == "zip") {
+		var zip = new JSZip()
+		for (var i = 0; i < pages.length; i++) {
+			zip.file(pages[i].label + ".2dj", JSON.stringify(pages[i]))
+		}
+		zip.generateAsync({ type: "base64" }).then(function (base64) {
+			var dataStr = "data:application/zip;base64," + base64
+			var dlAnchorElem = document.getElementById('downloadAnchorElem')
+			dlAnchorElem.setAttribute("href", dataStr)
+			dlAnchorElem.setAttribute("download", fn + ".2dj.zip")
+			dlAnchorElem.click()
+		});
 	}
 }
