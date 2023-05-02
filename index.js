@@ -44,7 +44,6 @@ function downloadJSON(obj, name) {
 const PAGE_WIDTH = 128
 const PAGE_HEIGHT = 128
 
-var quantizer = new RgbQuant({ colors: 63 })
 var size = [PAGE_WIDTH, PAGE_HEIGHT]
 var pageW = 1
 var pageH = 1
@@ -56,7 +55,7 @@ const processedImageOutput = document.getElementById("processedImage")
 
 const process = () => {
 	canvasCtx.fillStyle = "black"
-	quantizer = new RgbQuant({ colors: 63 })
+	var quantizer = new RgbQuant({ colors: 63 })
 	pageW = 1
 	pageH = 1
 	if (specPages.checked) {
@@ -94,6 +93,7 @@ const process = () => {
 		for (py = 0; py < pageH; py++) {
 			palettes[py] = palettes[py] || []
 			for (px = 0; px < pageW; px++) {
+                pageCtx.clearRect(0, 0, PAGE_WIDTH, PAGE_HEIGHT)
 				pageCtx.drawImage(canvas, px*PAGE_WIDTH, py*PAGE_WIDTH, PAGE_WIDTH, PAGE_HEIGHT, 0, 0, PAGE_WIDTH, PAGE_HEIGHT)
 				quantizer = new RgbQuant({ colors: 63 })
 				quantizer.sample(pageCanvas)
@@ -127,42 +127,41 @@ const process = () => {
 }
 
 const monitorChanges = [
-  serpentineDither,
-  perPageDither,
-  ditherType,
-  manyPages,
-  specPages,
-  pagesX,
-  pagesY,
-  transparency,
+    serpentineDither,
+    perPageDither,
+    ditherType,
+    manyPages,
+    specPages,
+    pagesX,
+    pagesY,
+    transparency,
 ];
 
 monitorChanges.forEach((element) => {
 	element.addEventListener("input", () => {
 		if (autoProcess.checked) {
-      process();
-    }	
+        process();
+        }	
 	})
 })
 
 imageInput.onchange = function (event) {
-  var selectedFile = event.target.files[0];
+    var selectedFile = event.target.files[0];
+    var reader = new FileReader();
 
-  var reader = new FileReader();
+    canvas.title = selectedFile.name;
 
-  canvas.title = selectedFile.name;
+	reader.onload = function (event) {
+		image.src = event.target.result;
+	};
 
-  reader.onload = function (event) {
-    image.src = event.target.result;
-  };
-
-  reader.readAsDataURL(selectedFile);
+	reader.readAsDataURL(selectedFile);
 
 	// for some reason, image inputting won't cause a change unless there's a timeout here
 	setTimeout(() => {
 		if (autoProcess.checked) {
-      process();
-    }
+			process();
+		}
 	}, 100)
 };
 
@@ -246,18 +245,18 @@ saveButton.onclick = function (event) {
 	}
 	if (outputFormat.value == "2dj") {
 		if (pages.length === 1) {
-      downloadJSON(pages[0], fn + ".2dj");
-    } else {
-      downloadJSON(
-        {
-          pages: pages,
-          width: pageW,
-          height: pageH,
-          title: fn,
-        },
-        fn + ".2dja"
-      );
-    }
+            downloadJSON(pages[0], fn + ".2dj");
+        } else {
+            downloadJSON(
+                    {
+                        pages: pages,
+                        width: pageW, 
+                        height: pageH,
+                        title: fn,
+                    },
+                fn + ".2dja"
+            );
+        }
 	} else if (outputFormat.value == "zip") {
 		var zip = new JSZip()
 		for (var i = 0; i < pages.length; i++) {

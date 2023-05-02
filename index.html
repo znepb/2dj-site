@@ -20,7 +20,7 @@
         <div class="input">
           <label for="imageInput">
             <h3>Input Image</h3>
-            <p class="informationText">Width & height should be a multiple of 128</p>
+            <p class="informationText">Width & height will be made a multiple of 128</p>
           </label>
           <input type="file" id="imageInput" name="imageInput" accept="image/*"/>
         </div>
@@ -74,7 +74,7 @@
             <h3>Per Page Quantization</h3>
             <p class="informationText">
               Calculates poster palettes per-page rather than a global palette,
-              resulting in a clearer output for larger images
+              resulting in more available colors for larger images
             </p>
           </label>
           <input type="checkbox" id="perPageDither">
@@ -83,7 +83,7 @@
         <div class="input">
           <label for="transparency">
             <h3>Transparency</h3>
-            <p class="informationText">Enable transparent pixels in the output</p>
+            <p class="informationText">Copy transparency to the output</p>
           </label>
           <input type="checkbox" id="transparency">
         </div>
@@ -124,7 +124,7 @@
         Single pages (e.g. a 1x1 page) will be exported as 2dj files, while multiple pages will be 
         exported as 2dja files. The specification for 2dja is as follows:<br />
         <ul>
-          <li>Pages: A JSON array of 2dj JSON objects</li>
+          <li>pages: A JSON array of 2dj JSON objects</li>
           <li>width: integer, pages wide</li>
           <li>height: integer, pages tall</li>
           <li>title: string, filename</li>
