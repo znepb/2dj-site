@@ -1,5 +1,106 @@
-div {
-    margin: auto;
-    width: 50%;
-    padding: 5px;
+:root {
+  color-scheme: light;
+  --background-color: #fff;
+  --text-color: #252525;
+  --muted-text-color: #747474;
+  --link: #267dff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --background-color: #252525;
+    --text-color: #fff;
+    --muted-text-color: #929292;
+    --link: #6DA8FF;
+  }
+}
+
+body {
+  background-color: var(--background-color);
+  font-family: 'Inter', sans-serif;
+  color: var(--text-color);
+  display: flex;
+  align-items: flex-start;
+  margin: 2.5rem;
+  gap: 2.5rem;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 40rem;
+}
+
+.section {
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1 {
+  font-weight: 800;
+  font-size: 2rem;
+  padding: 0;
+  margin: 0;
+}
+
+h2 {
+  font-weight: 800;
+  font-size: 1.5rem;
+  padding: 0;
+  margin: 0;
+}
+
+h3 {
+  font-weight: 600;
+  font-size: 1.125rem;
+  padding: 0;
+  margin: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0;
+}
+
+.informationText {
+  color: var(--muted-text-color);
+  font-size: 0.75rem;
+  max-width: 75%;
+}
+
+.input {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+}
+
+.input > label {
+  flex-grow: 1;
+}
+
+.radio {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.outputArea {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
