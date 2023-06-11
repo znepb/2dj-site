@@ -35,7 +35,7 @@ const canvasCtx = canvas.getContext("2d");
 function downloadJSON(obj, name) {
   const dataStr =
     "data:text/jsoncharset=utf-8," + encodeURIComponent(JSON.stringify(obj));
-  
+
   downloadAnchor.setAttribute("href", dataStr);
   downloadAnchor.setAttribute("download", name);
   downloadAnchor.click();
@@ -66,7 +66,7 @@ function process() {
   }
 
   scaledLabel.innerHTML = `Scaled to ${pageW} by ${pageH} pages.<br>
-  ${pageH * pageW} pieces of paper.<br> ${pageH * pageW * 5000} ink.<br>`
+  ${pageH * pageW} pieces of paper.<br> ${pageH * pageW * 5000} ink.<br>`;
 
   size = [PAGE_WIDTH * pageW, PAGE_HEIGHT * pageH];
   canvas.width = size[0];
@@ -103,9 +103,10 @@ function process() {
         new Uint8ClampedArray(quantizedImage),
         canvas.width,
         canvas.height
-      ), 0, 0
+      ),
+      0,
+      0
     );
-
   } else {
     paletteImage = [];
     palettes = [];
@@ -160,7 +161,6 @@ function process() {
   }
 
   if (transparency.checked) {
-
     // Transfer transparency
     const imageData = canvasCtx.getImageData(0, 0, canvas.width, canvas.height);
 
@@ -182,7 +182,7 @@ function process() {
   }
 
   processedImageOutput.src = canvas.toDataURL("image/png"); // show the preview
-};
+}
 
 const monitorChanges = [
   serpentineDither,
@@ -260,7 +260,7 @@ function getPixels(px, py) {
       pixels.push(paletteIndex);
     }
   }
-  
+
   return pixels;
 }
 
@@ -295,11 +295,9 @@ saveButton.onclick = () => {
 
   for (var y = 1; y <= pageH; y++) {
     for (var x = 1; x <= pageW; x++) {
-
       let pageInfo = "";
       if (appendPageInfo.checked) {
-        pageInfo =
-          ` : page (${x}, ${y}) of (${pageW}x${pageH})`;
+        pageInfo = ` : page (${x}, ${y}) of (${pageW}x${pageH})`;
       }
 
       pages.push({
@@ -326,13 +324,12 @@ saveButton.onclick = () => {
         fn + ".2dja"
       );
     }
-
   } else if (outputFormat.value == "zip") {
     const zip = new JSZip();
 
     pages.forEach((page) => {
-      zip.file(page.label + ".2dj", JSON.stringify(page))
-    })
+      zip.file(page.label + ".2dj", JSON.stringify(page));
+    });
 
     zip.generateAsync({ type: "base64" }).then(function (base64) {
       const dataStr = "data:application/zip;base64," + base64;
