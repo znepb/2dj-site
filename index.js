@@ -80,7 +80,7 @@ function process() {
     pageH = Math.max(Math.floor(image.height / PAGE_HEIGHT), 1);
   }
 
-  scaledLabel.innerHTML = `Scaled to ${pageW} by ${pageH} pages.<br>
+  scaledLabel.innerHTML = `Scaled to ${pageW} by ${pageH} pages.<br />
   ${pageH * pageW} pieces of paper.<br /> ${pageH * pageW * 5000} ink.<br />`;
 
   currentSize = [PAGE_WIDTH * pageW, PAGE_HEIGHT * pageH];
