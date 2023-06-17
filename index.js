@@ -43,14 +43,29 @@ function downloadJSON(obj, name) {
 
 const PAGE_WIDTH = 128;
 const PAGE_HEIGHT = 128;
+const MAX_LABEL_SIZE = 48;
 
-let size = [PAGE_WIDTH, PAGE_HEIGHT];
+const monitorChanges = [
+  serpentineDither,
+  perPageDither,
+  ditherType,
+  manyPages,
+  specPages,
+  pagesX,
+  pagesY,
+  transparency,
+];
+
+let currentSize = [PAGE_WIDTH, PAGE_HEIGHT];
 let pageW = 1;
 let pageH = 1;
 let palette = [];
 let palettes = [];
 let paletteImage = [];
 
+/**
+ * Process the image
+ */
 function process() {
   canvasCtx.fillStyle = "black";
   let quantizer = new RgbQuant({ colors: 63 });
@@ -66,11 +81,11 @@ function process() {
   }
 
   scaledLabel.innerHTML = `Scaled to ${pageW} by ${pageH} pages.<br>
-  ${pageH * pageW} pieces of paper.<br> ${pageH * pageW * 5000} ink.<br>`;
+  ${pageH * pageW} pieces of paper.<br /> ${pageH * pageW * 5000} ink.<br />`;
 
-  size = [PAGE_WIDTH * pageW, PAGE_HEIGHT * pageH];
-  canvas.width = size[0];
-  canvas.height = size[1];
+  currentSize = [PAGE_WIDTH * pageW, PAGE_HEIGHT * pageH];
+  canvas.width = currentSize[0];
+  canvas.height = currentSize[1];
 
   // clear the canvas
   canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
@@ -83,7 +98,7 @@ function process() {
     // quantize the image
     const quantizedImage = quantizer.reduce(
       canvas,
-      null,
+      undefined,
       ditherType.value,
       serpentineDither.checked
     );
@@ -184,17 +199,177 @@ function process() {
   processedImageOutput.src = canvas.toDataURL("image/png"); // show the preview
 }
 
-const monitorChanges = [
-  serpentineDither,
-  perPageDither,
-  ditherType,
-  manyPages,
-  specPages,
-  pagesX,
-  pagesY,
-  transparency,
-];
+/**
+ * Saves the image
+ */
+function save() {
+  const fn = canvas.title.replace(/\.[^/.]+$/, "");
+  const pages = [];
+  let label = fn;
 
+  if (manualLabel.checked) {
+    label = manualLabelInput.value;
+  }
+
+  process();
+
+  // Create data for each page to export to JSON object
+  for (var y = 1; y <= pageH; y++) {
+    for (var x = 1; x <= pageW; x++) {
+      let pageInfo = "";
+      if (appendPageInfo.checked) {
+        pageInfo = ` : page (${x}, ${y}) of (${pageW}x${pageH})`;
+      }
+
+      pages.push({
+        label: lengthLimit(label, pageInfo),
+        palette: getPalette(x, y),
+        pixels: getPixels(x, y),
+        width: PAGE_WIDTH,
+        height: PAGE_HEIGHT,
+      });
+    }
+  }
+
+  console.log(pages);
+
+  switch (outputFormat.value) {
+    case "2dj":
+      if (pages.length === 1) {
+        downloadJSON(pages[0], fn + ".2dj");
+      } else {
+        downloadJSON(
+          {
+            pages: pages,
+            width: pageW,
+            height: pageH,
+            title: fn,
+          },
+          fn + ".2dja"
+        );
+      }
+      break;
+    case "zip":
+      const zip = new JSZip();
+
+      pages.forEach((page) => {
+        zip.file(page.label + ".2dj", JSON.stringify(page));
+      });
+
+      zip.generateAsync({ type: "base64" }).then(function (base64) {
+        const dataStr = "data:application/zip;base64," + base64;
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", fn + ".2dj.zip");
+        downloadAnchor.click();
+      });
+      break;
+    default:
+      alert("Failed to save file");
+  }
+};
+
+/**
+ * Finds the color number in the palette
+ * @param {number} x X coordinate
+ * @param {number} y Y coordinate
+ * @returns Index of a palette
+ */
+function getPaletteIndex(x, y) {
+  return x + y * currentSize[0];
+}
+
+/**
+ * Creates a palette image for the specified page
+ * @param {number} px Page X
+ * @param {number} py Page Y
+ * @param {object} image The image
+ */
+function mergeIntoPaletteImage(px, py, image) {
+  var pageX = px * PAGE_WIDTH;
+  var pageY = py * PAGE_HEIGHT;
+  for (y = 0; y < PAGE_HEIGHT; y++) {
+    for (x = 0; x < PAGE_WIDTH; x++) {
+      var toIndex = getPaletteIndex(pageX + x, pageY + y);
+      var fromIndex = x + y * PAGE_WIDTH;
+      paletteImage[toIndex] = image[fromIndex];
+    }
+  }
+}
+
+/**
+ * Gets the index of a pixel in the image
+ * @param {number} px Page X
+ * @param {number} py Page Y
+ * @param {number} x Pixel X in image
+ * @param {number} y Pixel Y in image
+ * @returns {number} Index of a pixel
+ */
+function getPageIndex(px, py, x, y) {
+  return (
+    PAGE_WIDTH * pageW * (y + (py - 1) * PAGE_HEIGHT - 1) +
+    (px - 1) * PAGE_WIDTH +
+    x -
+    1
+  );
+}
+
+/**
+ * Gets pixels of the image at the given page and position
+ * @param {number} px Page X position
+ * @param {number} py Page Y position
+ * @returns {number[]}
+ */
+function getPixels(px, py) {
+  const pixels = [];
+
+  for (y = 1; y <= PAGE_HEIGHT; y++) {
+    for (x = 1; x <= PAGE_WIDTH; x++) {
+      const onPageIndex = getPageIndex(px, py, x, y);
+      const paletteIndex = paletteImage[onPageIndex] + 1;
+      pixels.push(paletteIndex);
+
+      if(isNaN(paletteIndex)) {
+        console.log("NaN at " + onPageIndex)
+      }
+    }
+  }
+
+  console.log(pixels)
+
+  return pixels;
+}
+
+/**
+ * Gets the palette for the given page
+ * @param {number} px The page X position
+ * @param {number} py The page Y position
+ * @returns The palette for the given pace
+ */
+function getPalette(px, py) {
+  let palToUse = palette;
+
+  if (perPageDither.checked) {
+    palToUse = palettes[py - 1][px - 1];
+  }
+
+  return palToUse.map((col) => (col[0] << 16) + (col[1] << 8) + col[2]);
+}
+
+/**
+ * Shortens a label if it's too long
+ * @param {string} name The label name
+ * @param {string} info The info the for label
+ * @returns The shortened label
+ */
+function lengthLimit(name, info) {
+  if (name.length + info.length > MAX_LABEL_SIZE) {
+    return name.substring(0, MAX_LABEL_SIZE - info.length) + info;
+  }
+
+  return name + info;
+}
+
+// Change monitoring
 monitorChanges.forEach((element) => {
   element.addEventListener("input", () => {
     if (autoProcess.checked) {
@@ -223,119 +398,5 @@ imageInput.onchange = (event) => {
   }, 100);
 };
 
-function getPaletteIndex(x, y) {
-  return x + y * size[1];
-}
-
-function mergeIntoPaletteImage(px, py, image) {
-  var pageX = px * PAGE_WIDTH;
-  var pageY = py * PAGE_HEIGHT;
-  for (y = 0; y < PAGE_HEIGHT; y++) {
-    for (x = 0; x < PAGE_WIDTH; x++) {
-      var toIndex = getPaletteIndex(pageX + x, pageY + y);
-      var fromIndex = x + y * PAGE_WIDTH;
-      paletteImage[toIndex] = image[fromIndex];
-    }
-  }
-}
-
 processButton.onclick = process;
-
-function getPageIndex(px, py, x, y) {
-  return (
-    PAGE_WIDTH * pageW * (y + (py - 1) * PAGE_HEIGHT - 1) +
-    (px - 1) * PAGE_WIDTH +
-    x -
-    1
-  );
-}
-
-function getPixels(px, py) {
-  const pixels = [];
-
-  for (y = 1; y <= PAGE_HEIGHT; y++) {
-    for (x = 1; x <= PAGE_WIDTH; x++) {
-      const onPageIndex = getPageIndex(px, py, x, y);
-      const paletteIndex = paletteImage[onPageIndex] + 1;
-      pixels.push(paletteIndex);
-    }
-  }
-
-  return pixels;
-}
-
-function getPalette(px, py) {
-  let palToUse = palette;
-
-  if (perPageDither.checked) {
-    palToUse = palettes[py - 1][px - 1];
-  }
-
-  return palToUse.map((col) => (col[0] << 16) + (col[1] << 8) + col[2]);
-}
-
-const MAX_LABEL_SIZE = 48;
-
-function lengthLimit(name, info) {
-  if (name.length + info.length > MAX_LABEL_SIZE) {
-    return name.substring(0, MAX_LABEL_SIZE - info.length) + info;
-  }
-
-  return name + info;
-}
-
-saveButton.onclick = () => {
-  const fn = canvas.title.replace(/\.[^/.]+$/, "");
-  const pages = [];
-  let label = fn;
-
-  if (manualLabel.checked) {
-    label = manualLabelInput.value;
-  }
-
-  for (var y = 1; y <= pageH; y++) {
-    for (var x = 1; x <= pageW; x++) {
-      let pageInfo = "";
-      if (appendPageInfo.checked) {
-        pageInfo = ` : page (${x}, ${y}) of (${pageW}x${pageH})`;
-      }
-
-      pages.push({
-        label: lengthLimit(label, pageInfo),
-        palette: getPalette(x, y),
-        pixels: getPixels(x, y),
-        width: PAGE_WIDTH,
-        height: PAGE_HEIGHT,
-      });
-    }
-  }
-
-  if (outputFormat.value === "2dj") {
-    if (pages.length === 1) {
-      downloadJSON(pages[0], fn + ".2dj");
-    } else {
-      downloadJSON(
-        {
-          pages: pages,
-          width: pageW,
-          height: pageH,
-          title: fn,
-        },
-        fn + ".2dja"
-      );
-    }
-  } else if (outputFormat.value == "zip") {
-    const zip = new JSZip();
-
-    pages.forEach((page) => {
-      zip.file(page.label + ".2dj", JSON.stringify(page));
-    });
-
-    zip.generateAsync({ type: "base64" }).then(function (base64) {
-      const dataStr = "data:application/zip;base64," + base64;
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", fn + ".2dj.zip");
-      downloadAnchor.click();
-    });
-  }
-};
+saveButton.onclick = save;
